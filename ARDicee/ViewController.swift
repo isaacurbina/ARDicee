@@ -22,18 +22,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
 		
-		let sphere = SCNSphere(radius: 0.2)
-		let material = SCNMaterial()
 		
-		material.diffuse.contents = UIImage(named: "art.scnassets/moon.jpg")
-		sphere.materials = [material]
+		sceneView.automaticallyUpdatesLighting = true
+		let scene = SCNScene(named: "art.scnassets/diceCollada.scn")
 		
-		let node = SCNNode(geometry: sphere)
-		node.position = SCNVector3(x: 0, y: 0.1, z: -0.5)
-		
-		sceneView.scene.rootNode.addChildNode(node)
-		
-		sceneView.autoenablesDefaultLighting = true
+		if let diceNode = scene?.rootNode.childNode(withName: "Dice", recursively: true) {
+			diceNode.position = SCNVector3(x: 0, y: 0, z: -0.1)
+			sceneView.scene.rootNode.addChildNode(diceNode)
+		}
     }
     
     override func viewWillAppear(_ animated: Bool) {
