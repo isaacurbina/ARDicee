@@ -89,8 +89,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 						z: hitResult.worldTransform.columns.3.z)
 					
 					sceneView.scene.rootNode.addChildNode(diceNode)
+					
+					
+					diceNode.runAction(
+						SCNAction.rotateBy(
+							x: CGFloat(getRandomFloat() * getRandomInt()),
+							y: CGFloat(getRandomFloat() * getRandomInt()),
+							z: CGFloat(getRandomFloat() * getRandomInt()),
+							duration: 0.5)
+					)
 				}
 			}
 		}
+	}
+	
+	private func getRandomFloat() -> Float {
+		return Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
+	}
+	
+	private func getRandomInt() -> Int {
+		return Int.random(in: 1...6)
 	}
 }
