@@ -78,4 +78,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 			return
 		}
 	}
+	
+	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+		if let touch = touches.first {
+			let location = touch.location(in: sceneView)
+			let results = sceneView.hitTest(location, types: [.existingPlaneUsingExtent])
+			
+			if !results.isEmpty {
+				print("touched the plane")
+			} else {
+				print("touched somewhere else")
+			}
+		}
+	}
 }
