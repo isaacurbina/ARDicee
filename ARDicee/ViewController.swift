@@ -11,8 +11,16 @@ import ARKit
 
 class ViewController: UIViewController, ARSCNViewDelegate {
 
+	// MARK: - IBOutlets
+	
     @IBOutlet var sceneView: ARSCNView!
+	
+	// MARK: - variables/objects
+	
+	var diceArray = [SCNNode]()
     
+	// MARK: - UIViewController
+	
     override func viewDidLoad() {
         super.viewDidLoad()
 		
@@ -50,6 +58,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
 	
+	// MARK: - IBActions
+	
+	@IBAction func rollAgain(_ sender: UIBarButtonItem) {
+		rollAll()
+	}
+	
+	// MARK: - ARSCNViewDelegate
+	
 	func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor : ARAnchor) {
 		if anchor is ARPlaneAnchor {
 			let planeAnchor = anchor as! ARPlaneAnchor
@@ -79,29 +95,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 			let results = sceneView.hitTest(location, types: [.existingPlaneUsingExtent])
 			
 			if let hitResult = results.first {
-				let scene = SCNScene(named: "art.scnassets/diceCollada.scn")
-				
-				if let diceNode = scene?.rootNode.childNode(withName: "Dice", recursively: true) {
-					
-					diceNode.position = SCNVector3(
-						x: hitResult.worldTransform.columns.3.x,
-						y: hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius,
-						z: hitResult.worldTransform.columns.3.z)
-					
-					sceneView.scene.rootNode.addChildNode(diceNode)
-					
-					
-					diceNode.runAction(
-						SCNAction.rotateBy(
-							x: CGFloat(getRandomFloat() * getRandomInt()),
-							y: CGFloat(getRandomFloat() * getRandomInt()),
-							z: CGFloat(getRandomFloat() * getRandomInt()),
-							duration: 0.5)
-					)
-				}
+				createDice(with: hitResult)
 			}
 		}
 	}
+	
+	override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
+		rollAll()
+	}
+	
+	// MARK: - private functions
 	
 	private func getRandomFloat() -> Float {
 		return Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
@@ -109,5 +112,39 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 	
 	private func getRandomInt() -> Int {
 		return Int.random(in: 1...6)
+	}
+	
+	private func createDice(with hitResult: ARHitTestResult) {
+		let scene = SCNScene(named: "art.scnassets/diceCollada.scn")
+		
+		if let diceNode = scene?.rootNode.childNode(withName: "Dice", recursively: true) {
+			
+			diceNode.position = SCNVector3(
+				x: hitResult.worldTransform.columns.3.x,
+				y: hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius,
+				z: hitResult.worldTransform.columns.3.z)
+			
+			diceArray.append(diceNode)
+			sceneView.scene.rootNode.addChildNode(diceNode)
+			roll(dice: diceNode)
+		}
+	}
+	
+	private func rollAll() {
+		if !diceArray.isEmpty {
+			for dice in diceArray {
+				roll(dice: dice)
+			}
+		}
+	}
+	
+	private func roll(dice: SCNNode) {
+		dice.runAction(
+			SCNAction.rotateBy(
+				x: CGFloat(getRandomFloat() * Float(getRandomInt())),
+				y: CGFloat(getRandomFloat() * Float(getRandomInt())),
+				z: CGFloat(getRandomFloat() * Float(getRandomInt())),
+				duration: 0.5)
+		)
 	}
 }
