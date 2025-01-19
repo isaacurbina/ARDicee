@@ -25,8 +25,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 	
     override func viewDidLoad() {
         super.viewDidLoad()
-		
-		sceneView.debugOptions = [.showFeaturePoints]
         
         // Set the view's delegate
         sceneView.delegate = self
@@ -81,20 +79,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 	
 	func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor : ARAnchor) {
 		if anchor is ARPlaneAnchor {
-			let planeAnchor = anchor as! ARPlaneAnchor
-			let plane = SCNPlane(
-				width: CGFloat(planeAnchor.extent.x),
-				height: CGFloat(planeAnchor.extent.z)
-			)
-			
-			let planeNode = SCNNode(geometry: plane)
-			planeNode.position = SCNVector3(x: planeAnchor.center.x, y: 0, z: planeAnchor.center.z)
-			planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
-			
-			let gridMaterial = SCNMaterial()
-			gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
-			
-			plane.materials = [gridMaterial]
+			guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
+			let planeNode = createPlane(with: planeAnchor)
 			node.addChildNode(planeNode)
 		
 		} else {
@@ -108,7 +94,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 			let results = sceneView.hitTest(location, types: [.existingPlaneUsingExtent])
 			
 			if let hitResult = results.first {
-				createDice(with: hitResult)
+				addDice(at: hitResult)
 			}
 		}
 	}
@@ -120,6 +106,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 	
 	// MARK: - private functions
 	
+	private func createPlane(with  planeAnchor: ARPlaneAnchor) -> SCNNode {
+		let plane = SCNPlane(
+			width: CGFloat(planeAnchor.extent.x),
+			height: CGFloat(planeAnchor.extent.z)
+		)
+		
+		let planeNode = SCNNode(geometry: plane)
+		planeNode.position = SCNVector3(x: planeAnchor.center.x, y: 0, z: planeAnchor.center.z)
+		planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
+		
+		let gridMaterial = SCNMaterial()
+		gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
+		
+		
+		plane.materials = [gridMaterial]
+		
+		return planeNode
+	}
+	
 	private func getRandomFloat() -> Float {
 		return Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
 	}
@@ -128,7 +133,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 		return Int.random(in: 1...6)
 	}
 	
-	private func createDice(with hitResult: ARHitTestResult) {
+	private func addDice(at hitResult: ARHitTestResult) {
 		let scene = SCNScene(named: "art.scnassets/diceCollada.scn")
 		
 		if let diceNode = scene?.rootNode.childNode(withName: "Dice", recursively: true) {
