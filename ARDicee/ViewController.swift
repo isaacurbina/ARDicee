@@ -15,10 +15,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 	
     @IBOutlet var sceneView: ARSCNView!
 	
+	
 	// MARK: - variables/objects
 	
 	var diceArray = [SCNNode]()
     
+	
 	// MARK: - UIViewController
 	
     override func viewDidLoad() {
@@ -58,11 +60,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
 	
+	
 	// MARK: - IBActions
 	
 	@IBAction func rollAgain(_ sender: UIBarButtonItem) {
 		rollAll()
 	}
+	
+	@IBAction func removeAllDice(_ sender: UIBarButtonItem) {
+		if !diceArray.isEmpty {
+			for dice in diceArray {
+				dice.removeFromParentNode()
+			}
+		}
+		diceArray.removeAll()
+	}
+	
 	
 	// MARK: - ARSCNViewDelegate
 	
@@ -103,6 +116,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 	override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
 		rollAll()
 	}
+	
 	
 	// MARK: - private functions
 	
